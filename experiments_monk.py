@@ -8,7 +8,7 @@ from src.ensamble_svr import ensamble_srv_model_selection
 from src.linear_models import linear_model_selection, model_assessment, linear_lbe_regularized_model_selection, \
     LASSO_model_selection, RIDGE_model_selection, linear_lbe_reg_model_selection
 from src.random_forest import random_forest_model_selection
-from src.svc import svr_model_selection, svc_model_selection
+from src.svm import svr_model_selection, svc_model_selection
 from src.utils.io import save_gridsearch_results, load_gridsearch_results
 from src.utils.plots import plot_search_results, plot_search_df_results
 from src.utils.preprocessing import cup_create_df, cup_split_data_target, monk_create_df, monk_split_data_target
