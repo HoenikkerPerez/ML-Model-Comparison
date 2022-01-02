@@ -1,4 +1,4 @@
-best_model: {'scl': StandardScaler(), 'reg': MultiOutputRegressor(estimator=Lasso(alpha=0.001))}
+ best_model: {'scl': StandardScaler(), 'reg': MultiOutputRegressor(estimator=Lasso(alpha=0.001))}
 train_score: 1.89 (0.02)
 test_score: 1.90 (0.08)
 fit_time: 0.01 (0.00)
