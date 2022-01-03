@@ -62,28 +62,35 @@ for monk_idx in [1,2,3]:
 
     # LINEAR MODEL WITH L1 REGULARIZATION
     lasso_gs = LASSO_model_selection(X_train, y_train, mode="classifier")
-    # plot_search_results(lasso_gs, "LASSO parameters")
+    plot_search_results(lasso_gs, "LASSO parameters", vmin=0.5, vmax=1.1)
     lasso_acc = model_assessment(lasso_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(lasso_gs, "../results/linear/lasso_gs_results.csv")
 
     # LINEAR MODEL WITH L2 REGULARIZATION
     ridge_gs = RIDGE_model_selection(X_train, y_train, mode="classifier")
-    # plot_search_results(ridge_gs, "RIDGE parameters")
+    plot_search_results(ridge_gs, "RIDGE parameters", vmin=0.5, vmax=1.1)
     ridge_acc = model_assessment(ridge_gs.best_estimator_, X_train, y_train, X_test, y_test)
 
     # LINEAR MODEL WITH LBE AND REGULARIZATION
     lbe_reg_gs = linear_lbe_reg_model_selection(X_train, y_train, mode="classifier")
-    # plot_search_results(ridge_gs, "LBE WITH REGULARIZATION parameters")
+    plot_search_results(ridge_gs, "LBE WITH REGULARIZATION parameters", vmin=0.5, vmax=1.1)
     lbe_reg_mee = model_assessment(lbe_reg_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(lbe_reg_gs, "../results/linear/lbe_reg_results.csv")
 
     # SUPPORT VECTOR CLASSIFIER
     svc_gs = svc_model_selection(X_train, y_train)
-    plot_search_results(svc_gs, "SVR parameters")
+    plot_search_results(svc_gs, "SVR parameters", vmin=0.5, vmax=1.1)
     svc_acc = model_assessment(svc_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(svc_gs, "results/svc/svc_results.csv")
 
+    # RANDOM FOREST
+    random_forest_gs = random_forest_model_selection(X_train, y_train, mode="classifier")
+    plot_search_results(random_forest_gs, "RANDOM FOREST CLASS parameters", vmin=0.5, vmax=1.1)
+    lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    # save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_results.csv")
 
+# PLOTS
+# all
 
 
 """# LINEAR MODEL

@@ -53,7 +53,7 @@ def plot_search_df_results(results, title):
     plt.show()
 
 
-def plot_search_results(grid, title):
+def plot_search_results(grid, title, vmin=0, vmax=3):
     # Results from grid search
     results = grid.cv_results_
     means_test = np.abs(results['mean_test_score'])
@@ -91,7 +91,7 @@ def plot_search_results(grid, title):
             # ax[i].errorbar(x, np.abs(y_1), e_1, linestyle='--', marker='o', label='test')
             # ax[i].errorbar(x, np.abs(y_2), e_2, linestyle='-', marker='^', label='train')
             # ax[i].set_xscale("log")
-            ax[i].set_ylim([0, 3])
+            ax[i].set_ylim([vmin, vmax])
             ax[i].set_xlabel(p.upper())
     else:
         p = masks_names[0]

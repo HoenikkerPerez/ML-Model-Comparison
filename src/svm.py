@@ -12,10 +12,10 @@ from src.utils.preprocessing import mean_euclidian_error_loss
 # CLASSIFICATION
 def svc_model_selection(X_train, y_train):
     print("--------- SVM CLASSIFIER MODEL SELECTION ---------")
-    coarse_gs = svr_gridsearch(X_train, y_train)
+    coarse_gs = svc_gridsearch(X_train, y_train)
     C, gamma = coarse_gs.best_params_['C'], coarse_gs.best_params_['gamma']
-    plot_search_results(coarse_gs, "SVC parameters")
-    finer_gs = svr_gridsearch(X_train, y_train, is_fine_search=True, coarse_gamma=gamma, coarse_C=C)
+    plot_search_results(coarse_gs, "SVC parameters", vmin=0, vmax=1)
+    finer_gs = svc_gridsearch(X_train, y_train, is_fine_search=True, coarse_gamma=gamma, coarse_C=C)
     return finer_gs
 
 
@@ -32,16 +32,17 @@ def svc_gridsearch(X_train, y_train, is_fine_search=False, coarse_gamma=None, co
         # gamma_range = 10 ** np.arange(-4, 1, step=1, dtype=float)
         # C_range = 10 ** np.arange(-1, 1, step=1, dtype=float)
 
-    pipe_svr = Pipeline([('scl', StandardScaler()),
-                         ('reg', SVC(kernel="rbf"))])
-    tuned_parameters = {'reg__base_estimator__gamma': gamma_range,
-                        'reg__base_estimator__C': C_range}
+    model = SVC(kernel="rbf")
+    # print(model.get_params().keys())
+    tuned_parameters = {'gamma': gamma_range,
+                        'C': C_range}
+
+
     # Coarse Gridsearch
-    scorer = make_scorer(mean_euclidian_error_loss, greater_is_better=False)
-    gs = GridSearchCV(estimator=pipe_svr,
+    gs = GridSearchCV(estimator=model,
                       cv=5,
                       param_grid=tuned_parameters,
-                      scoring=scorer,
+                      scoring="accuracy",
                       verbose=1,
                       n_jobs=-1,
                       return_train_score=True)
@@ -57,7 +58,7 @@ def svc_gridsearch(X_train, y_train, is_fine_search=False, coarse_gamma=None, co
 def svr_model_selection(X_train, y_train):
     print("--------- SVR MODEL SELECTION ---------")
     coarse_gs = svr_gridsearch(X_train, y_train)
-    gamma, C = coarse_gs.best_params_['reg__base_estimator__C'], coarse_gs.best_params_['reg__base_estimator__gamma']
+    C, gamma = coarse_gs.best_params_['reg__base_estimator__C'], coarse_gs.best_params_['reg__base_estimator__gamma']
     plot_search_results(coarse_gs, "SVR parameters")
     finer_gs = svr_gridsearch(X_train, y_train, is_fine_search=True, coarse_gamma=gamma, coarse_C=C)
     return finer_gs
@@ -75,16 +76,17 @@ def svr_gridsearch(X_train, y_train, is_fine_search=False, coarse_gamma=None, co
 
         # gamma_range = 10 ** np.arange(-4, 1, step=1, dtype=float)
         # C_range = 10 ** np.arange(-1, 1, step=1, dtype=float)
+    pipe_svr = Pipeline([
+                         ('reg', RegressorChain(SVR(kernel="rbf")))])
+    tuned_parameters = {'reg__base_estimator__gamma': gamma_range,
+                        'reg__base_estimator__C': C_range}
 
-    svc = SVC(kernel="rbf")
-    tuned_parameters = {'gamma': gamma_range,
-                        'C': C_range}
     # Coarse Gridsearch
     scorer = make_scorer(mean_euclidian_error_loss, greater_is_better=False)
-    gs = GridSearchCV(estimator=svc,
+    gs = GridSearchCV(estimator=pipe_svr,
                       cv=5,
                       param_grid=tuned_parameters,
-                      scoring="accuracy",
+                      scoring=scorer,
                       verbose=1,
                       n_jobs=-1,
                       return_train_score=True)

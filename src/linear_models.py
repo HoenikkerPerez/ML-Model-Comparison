@@ -86,6 +86,8 @@ def linear_lbe_regularized_model_selection(X_train, y_train, lbe="poly"):
 def LASSO_model_selection(X_train, y_train, mode="regression"):
     # Hyperparameters
     if mode == "regression":
+        print()
+        print("--------- LASSO REGRESSION MODEL SELECTION ---------")
         alpha_range = np.logspace(-4, 0, 5)
         pipe_svr = Pipeline([('scl', StandardScaler()),
                              ('reg', MultiOutputRegressor(Lasso()))])
@@ -142,6 +144,8 @@ def LASSO_model_selection(X_train, y_train, mode="regression"):
 
 def RIDGE_model_selection(X_train, y_train, mode="regression"):
     if mode == "regression":
+        print()
+        print("--------- RIDGE REGRESSION MODEL SELECTION ---------")
         # Hyperparameters
         alpha_range = np.logspace(-4, 0, 5)
         pipe_svr = Pipeline([('scl', StandardScaler()),
@@ -203,6 +207,8 @@ def linear_lbe_reg_model_selection(X_train, y_train, mode="regression"):
         def score(self): pass
 
     if mode=="regression":
+        print()
+        print("--------- LBE+LINEAR REGRESSION MODEL SELECTION ---------")
         # Hyperparameters
         alpha_range = np.linspace(.00001, .001, 100)
 
