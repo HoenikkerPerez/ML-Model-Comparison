@@ -1,3 +1,4 @@
+import pandas as pd
 from sklearn.model_selection._split import train_test_split
 import os
 
@@ -8,6 +9,7 @@ from src.random_forest import random_forest_model_selection
 from src.svm import svr_model_selection
 from src.utils.io import save_gridsearch_results, load_gridsearch_results
 from src.utils.plots import plot_search_results, plot_search_df_results
+from src.mlp import mlcup_model_selection, mlcup_model_assessment
 from src.utils.preprocessing import cup_create_df, cup_split_data_target
 
 train_path = "data/ml-cup21/ML-CUP21-TR.csv"
@@ -72,10 +74,21 @@ lbe_reg_mee = model_assessment(ens_svr_gs, X_train, y_train, X_inner_test, y_inn
 # RANDOM FOREST
 # results_df = load_gridsearch_results("results/linear/linear_lbe_regularized_gs_results.csv")
 # plot_search_df_results(results_df, "ENSAMBLE SVR parameters")
-random_forest_gs = random_forest_model_selection(X_train, y_train)
-plot_search_results(random_forest_gs, "ENSAMBLE SVR parameters")
-lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
-save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_results.csv")
+#random_forest_gs = random_forest_model_selection(X_train, y_train)
+#plot_search_results(random_forest_gs, "ENSAMBLE SVR parameters")
+#lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
+#save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_results.csv")
 
 # PLOTS
 # all
+
+
+# MLP
+# starts model selection and returns dataframe with optimal hyperparameters
+# optimal_df = mlcup_model_selection(X_train, y_train)
+# or read already saved csv file with results of the model selection
+kfold_cv_df = pd.read_csv("./results/mlp/cup_results_GS.csv")
+# get optimal hyperparameter values according to the minimum validation loss
+optimal_df = kfold_cv_df[kfold_cv_df.mean_val_loss == kfold_cv_df.mean_val_loss.min()]
+#train a new MLP model and evaluate on internal test set
+mlcup_model_assessment(optimal_df, X_train, y_train, X_inner_test, y_inner_test)

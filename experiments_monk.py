@@ -1,6 +1,9 @@
 import numpy as np
+import pandas as pd
 from sklearn.model_selection._split import train_test_split
 import os
+
+from src.mlp import monks_model_selection, monks_model_assessment
 
 from sklearn.preprocessing._encoders import OneHotEncoder
 
@@ -51,43 +54,56 @@ for monk_idx in [1,2,3]:
     train_df = monk_create_df(train_path)
     test_df = monk_create_df(test_path)
     # Drop first column - remove index columns
-    X_train, y_train = monk_split_data_target(train_df)
-    X_test, y_test = monk_split_data_target(test_df)
+    X_train_df, y_train_df = monk_split_data_target(train_df)
+    X_test_df, y_test_df = monk_split_data_target(test_df)
 
     # one hot encoding
     one_hot_encoder = OneHotEncoder(sparse=False)
-    one_hot_encoder.fit(X_train)
-    X_train = one_hot_encoder.transform(X_train)
-    X_test = one_hot_encoder.transform(X_test)
+    one_hot_encoder.fit(X_train_df.to_numpy())
+    X_train = one_hot_encoder.transform(X_train_df.to_numpy())
+    y_train = y_train_df.to_numpy()
+    X_test = one_hot_encoder.transform(X_test_df.to_numpy())
+    y_test = y_test_df.to_numpy()
 
     # LINEAR MODEL WITH L1 REGULARIZATION
-    lasso_gs = LASSO_model_selection(X_train, y_train, mode="classifier")
-    plot_search_results(lasso_gs, "LASSO parameters", vmin=0.5, vmax=1.1)
-    lasso_acc = model_assessment(lasso_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    #lasso_gs = LASSO_model_selection(X_train, y_train, mode="classifier")
+    #plot_search_results(lasso_gs, "LASSO parameters", vmin=0.5, vmax=1.1)
+    #lasso_acc = model_assessment(lasso_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(lasso_gs, "../results/linear/lasso_gs_results.csv")
 
     # LINEAR MODEL WITH L2 REGULARIZATION
-    ridge_gs = RIDGE_model_selection(X_train, y_train, mode="classifier")
-    plot_search_results(ridge_gs, "RIDGE parameters", vmin=0.5, vmax=1.1)
-    ridge_acc = model_assessment(ridge_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    #ridge_gs = RIDGE_model_selection(X_train, y_train, mode="classifier")
+    #plot_search_results(ridge_gs, "RIDGE parameters", vmin=0.5, vmax=1.1)
+    #ridge_acc = model_assessment(ridge_gs.best_estimator_, X_train, y_train, X_test, y_test)
 
     # LINEAR MODEL WITH LBE AND REGULARIZATION
-    lbe_reg_gs = linear_lbe_reg_model_selection(X_train, y_train, mode="classifier")
-    plot_search_results(ridge_gs, "LBE WITH REGULARIZATION parameters", vmin=0.5, vmax=1.1)
-    lbe_reg_mee = model_assessment(lbe_reg_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    #lbe_reg_gs = linear_lbe_reg_model_selection(X_train, y_train, mode="classifier")
+    #plot_search_results(ridge_gs, "LBE WITH REGULARIZATION parameters", vmin=0.5, vmax=1.1)
+    #lbe_reg_mee = model_assessment(lbe_reg_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(lbe_reg_gs, "../results/linear/lbe_reg_results.csv")
 
     # SUPPORT VECTOR CLASSIFIER
-    svc_gs = svc_model_selection(X_train, y_train)
-    plot_search_results(svc_gs, "SVR parameters", vmin=0.5, vmax=1.1)
-    svc_acc = model_assessment(svc_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    #svc_gs = svc_model_selection(X_train, y_train)
+    #plot_search_results(svc_gs, "SVR parameters", vmin=0.5, vmax=1.1)
+    #svc_acc = model_assessment(svc_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(svc_gs, "results/svc/svc_results.csv")
 
     # RANDOM FOREST
-    random_forest_gs = random_forest_model_selection(X_train, y_train, mode="classifier")
-    plot_search_results(random_forest_gs, "RANDOM FOREST CLASS parameters", vmin=0.5, vmax=1.1)
-    lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    #random_forest_gs = random_forest_model_selection(X_train, y_train, mode="classifier")
+    #plot_search_results(random_forest_gs, "RANDOM FOREST CLASS parameters", vmin=0.5, vmax=1.1)
+    #lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_results.csv")
+
+    # MLP
+    # starts model selection and returns dataframe with optimal hyperparameters
+    # optimal_df = monks_model_selection(X_train_df, y_train_df)
+    # or read already saved csv file with results of the model selection
+    kfold_cv_df = pd.read_csv(f"./results/mlp/Monk_{monk_idx}_results_GS.csv")
+    # get optimal hyperparameter values according to the minimum validation loss
+    optimal_df = kfold_cv_df[kfold_cv_df.mean_val_accuracy == kfold_cv_df.mean_val_accuracy.max()]
+    # train a new MLP model and evaluate on test set
+    monks_model_assessment(optimal_df, X_train, y_train, X_test, y_test, monk_idx)
+
 
 # PLOTS
 # all

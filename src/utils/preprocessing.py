@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder
 
 pd.set_option('display.max_columns', None)
 
@@ -40,10 +41,67 @@ def monk_create_df(path):
 
 
 def monk_split_data_target(df):
+    # ho modificato, mi servivano i dataframe e non i numpy array
     y = df["Class"]
     x = df.drop("Class", axis=1)
-    return x.to_numpy(), y.to_numpy()
+    return x, y
 
 def mean_euclidian_error_loss(y_true, pred_y):
     l2_norms = np.linalg.norm(y_true - pred_y, axis=1)
     return np.mean(l2_norms, axis=0)
+
+
+def create_monks_df(path):
+    columns = ["class", "a1", "a2", "a3", "a4", "a5", "a6", "id"]
+    df = pd.DataFrame(columns=columns)
+
+    # Using readline()
+    file1 = open(path, 'r')
+
+    i = 0
+    while True:
+        # Get next line from file
+        line = file1.readline()
+
+        # if line is empty
+        # end of file is reached
+        if not line:
+            break
+        elems = line.strip().split(" ")
+        df.loc[i] = elems
+        i += 1
+
+    file1.close()
+
+    return df
+
+
+def create_monks_dataset(df):
+    for elem in df.columns:
+        if elem == "id":
+            pass
+        else:
+            df[elem] = df[elem].astype(int)
+
+    target = df["class"]
+    tmp_df = df.drop('class', inplace=False, axis=1)
+    tmp_df = tmp_df.drop('id', inplace=False, axis=1)
+
+    # one hot encoding
+    one_hot_encoder = OneHotEncoder(sparse=False)
+    one_hot_encoder.fit(tmp_df)
+
+    data = one_hot_encoder.transform(tmp_df)
+
+    list_of_cat = one_hot_encoder.categories_
+
+    j = 1
+    columns = []
+    for lst in list_of_cat:
+        for elem in lst:
+            columns.append("column" + str(j))
+            j += 1
+
+    df_encoded = pd.DataFrame(data=data, columns=columns)
+
+    return df_encoded, target

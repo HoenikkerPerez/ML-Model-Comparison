@@ -106,3 +106,24 @@ def plot_search_results(grid, title, vmin=0, vmax=3):
         ax.set_xlabel(p.upper())
     plt.legend()
     plt.show()
+
+
+def plot_learning_curves_mlp(history, path, name):
+    plt.figure()
+    plt.plot(history.history["loss"], label="Training Loss")
+    plt.plot(history.history["val_loss"], label="Validation Loss", linestyle='dashed')
+    plt.title('Training and validation loss '+name)
+    plt.legend()
+    new_path=path+"{}_loss.png".format(name)
+    plt.savefig(new_path)
+
+    if "accuracy" in history.history.keys():
+        plt.figure()
+        plt.plot(history.history["accuracy"], label="Training Accuracy")
+        plt.plot(history.history["val_accuracy"], label="Validation Accuracy", linestyle='dashed')
+        plt.title('Training and validation accuracy '+name)
+        plt.legend()
+        new_path = path + "{}_accuracy.png".format(name)
+        plt.savefig(new_path)
+
+    plt.show()
