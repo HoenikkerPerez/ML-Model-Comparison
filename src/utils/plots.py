@@ -108,11 +108,13 @@ def plot_search_results(grid, title, vmin=0, vmax=3):
     plt.show()
 
 
-def plot_learning_curves_mlp(history, path, name):
+def plot_learning_curves_mlp(history=None, path='', name='', loss='MSE'):
     plt.figure()
     plt.plot(history.history["loss"], label="Training Loss")
     plt.plot(history.history["val_loss"], label="Validation Loss", linestyle='dashed')
-    plt.title('Training and validation loss '+name)
+    plt.title(f'Training and validation loss {name}')
+    plt.ylabel(loss)
+    plt.xlabel("EPOCHS")
     plt.legend()
     new_path=path+"{}_loss.png".format(name)
     plt.savefig(new_path)
@@ -121,8 +123,11 @@ def plot_learning_curves_mlp(history, path, name):
         plt.figure()
         plt.plot(history.history["accuracy"], label="Training Accuracy")
         plt.plot(history.history["val_accuracy"], label="Validation Accuracy", linestyle='dashed')
-        plt.title('Training and validation accuracy '+name)
+        plt.title(f'Training and validation accuracy {name}')
+        plt.ylabel("ACCURACY")
+        plt.xlabel("EPOCHS")
         plt.legend()
+
         new_path = path + "{}_accuracy.png".format(name)
         plt.savefig(new_path)
 

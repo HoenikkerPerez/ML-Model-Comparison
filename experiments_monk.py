@@ -48,22 +48,21 @@ for monk_idx in [1,2,3]:
     train_path = "data/monk/monks-{}.train".format(monk_idx)
     test_path = "data/monk/monks-{}.test".format(monk_idx)
 
+
     train_path = os.path.join(os.path.dirname(__file__), train_path)
     test_path = os.path.join(os.path.dirname(__file__), test_path)
 
     train_df = monk_create_df(train_path)
     test_df = monk_create_df(test_path)
     # Drop first column - remove index columns
-    X_train_df, y_train_df = monk_split_data_target(train_df)
-    X_test_df, y_test_df = monk_split_data_target(test_df)
+    X_train, y_train = monk_split_data_target(train_df)
+    X_test, y_test = monk_split_data_target(test_df)
 
     # one hot encoding
     one_hot_encoder = OneHotEncoder(sparse=False)
-    one_hot_encoder.fit(X_train_df.to_numpy())
-    X_train = one_hot_encoder.transform(X_train_df.to_numpy())
-    y_train = y_train_df.to_numpy()
-    X_test = one_hot_encoder.transform(X_test_df.to_numpy())
-    y_test = y_test_df.to_numpy()
+    one_hot_encoder.fit(X_train)
+    X_train = one_hot_encoder.transform(X_train)
+    X_test = one_hot_encoder.transform(X_test)
 
     # LINEAR MODEL WITH L1 REGULARIZATION
     #lasso_gs = LASSO_model_selection(X_train, y_train, mode="classifier")
@@ -96,13 +95,14 @@ for monk_idx in [1,2,3]:
 
     # MLP
     # starts model selection and returns dataframe with optimal hyperparameters
-    # optimal_df = monks_model_selection(X_train_df, y_train_df)
+    optimal_df = monks_model_selection(X_train, y_train, monk_idx)
     # or read already saved csv file with results of the model selection
-    kfold_cv_df = pd.read_csv(f"./results/mlp/Monk_{monk_idx}_results_GS.csv")
+    #kfold_cv_df = pd.read_csv(f"./results/mlp/Monk_{monk_idx}_results_holdout_REG.csv")
     # get optimal hyperparameter values according to the minimum validation loss
-    optimal_df = kfold_cv_df[kfold_cv_df.mean_val_accuracy == kfold_cv_df.mean_val_accuracy.max()]
+    #optimal_df = kfold_cv_df[kfold_cv_df.val_accuracy == kfold_cv_df.val_accuracy.max()]
+    optimal_df = optimal_df[optimal_df.val_loss == optimal_df.val_loss.min()]
     # train a new MLP model and evaluate on test set
-    monks_model_assessment(optimal_df, X_train, y_train, X_test, y_test, monk_idx)
+    monks_model_assessment(optimal_df=optimal_df, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, monks_counter=monk_idx)
 
 
 # PLOTS
