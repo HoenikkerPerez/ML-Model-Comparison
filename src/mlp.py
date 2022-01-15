@@ -21,14 +21,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 #GLOBAL VARIABLES
 EPOCHS = 5000
-VALIDATION_SPLIT_MONKS = 0.15
+VALIDATION_SPLIT_MONKS = 0.2
 VALIDATION_SPLIT_CUP = 0.2
 TEST_SIZE_MLCUP = 0.2
 EARLY_STOPPING_PATIENCE_CUP = 40
 EARLY_STOPPING_PATIENCE_MONK = 100
 
 KFOLD_SPLITS_CUP=5
-KFOLD_SPLITS_MONK=3
 WORKERS_POOL=100
 
 
@@ -260,8 +259,6 @@ def mlcup_model_assessment(optimal_df, X_train, y_train, X_test, y_test):
 
 
 def monks_model_selection(X_train, y_train, monks_counter):
-    tf.keras.backend.clear_session()
-
     param_grid = {
         "units": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         "weights": [0.1,0.2, 0.3, 0.5, 0.7],

@@ -43,7 +43,7 @@ def model_assessment(model, X_train, y_train, X_test, y_test, mode="regression")
 
         return accuracy
 
-for monk_idx in [1,2,3]:
+for monk_idx in [3]:
     print("\t\tMONK{} EXPERIMENTS:".format(monk_idx))
     train_path = "data/monk/monks-{}.train".format(monk_idx)
     test_path = "data/monk/monks-{}.test".format(monk_idx)

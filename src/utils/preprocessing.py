@@ -45,7 +45,6 @@ def monk_create_df(path):
 
 
 def monk_split_data_target(df):
-    # ho modificato, mi servivano i dataframe e non i numpy array
     y = df["Class"]
     x = df.drop("Class", axis=1)
     return x.to_numpy(), y.to_numpy()
