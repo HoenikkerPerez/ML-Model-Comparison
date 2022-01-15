@@ -116,7 +116,7 @@ def plot_learning_curves_mlp(history=None, path='', name='', loss='MSE'):
     plt.ylabel(loss)
     plt.xlabel("EPOCHS")
     plt.legend()
-    new_path=path+"{}_loss.png".format(name)
+    new_path=path+"{}_REG_loss.png".format(name)
     plt.savefig(new_path)
 
     if "accuracy" in history.history.keys():
@@ -128,7 +128,7 @@ def plot_learning_curves_mlp(history=None, path='', name='', loss='MSE'):
         plt.xlabel("EPOCHS")
         plt.legend()
 
-        new_path = path + "{}_accuracy.png".format(name)
+        new_path = path + "{}_REG_accuracy.png".format(name)
         plt.savefig(new_path)
 
     plt.show()

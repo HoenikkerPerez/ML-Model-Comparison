@@ -263,8 +263,8 @@ def monks_model_selection(X_train, y_train, monks_counter):
         "units": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         "weights": [0.1,0.2, 0.3, 0.5, 0.7],
         "learning_rate": [0.0001, 0.001, 0.01, 0.1],
-        #"lambda_reg": [0.0, 0.00001, 0.0001, 0.001, 0.01],
-        "lambda_reg":[0.0],
+        "lambda_reg": [0.0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 0.5],
+        #"lambda_reg":[0.0],
         "loss":['mse']
     }
     keys = param_grid.keys()
@@ -278,7 +278,7 @@ def monks_model_selection(X_train, y_train, monks_counter):
 
     kfold_cv_df = pd.DataFrame(columns=dataframe_output_columns)
 
-    pool = Pool(WORKERS_POOL)
+    pool = Pool()
 
     n_combination = len(param_list)
 
@@ -307,7 +307,7 @@ def monks_model_selection(X_train, y_train, monks_counter):
     print("hold out for Monk {} end".format(monks_counter))
 
     # saving the results into a csv file
-    kfold_cv_df.to_csv("./results/mlp/Monk_{}_results_holdout.csv".format(monks_counter))
+    kfold_cv_df.to_csv("./results/mlp/Monk_{}_results_holdout_REG.csv".format(monks_counter))
 
     # get optimal hyperparameter values according to the max validation accuracy
     optimal_df = kfold_cv_df[kfold_cv_df.val_accuracy == kfold_cv_df.val_accuracy.max()]
@@ -339,8 +339,8 @@ def monks_model_assessment(optimal_df, X_train, y_train, X_test, y_test, monks_c
     path = "./results/mlp/images/"
     plot_learning_curves_mlp(history=history, path=path, name=f"Monks_{monks_counter}", loss=loss)
 
-    model.save("./results/mlp/models/Monks_{}_model".format(monks_counter))
+    model.save("./results/mlp/models/Monks_{}_REG_model".format(monks_counter))
 
     score = model.evaluate(X_test, y_test)
 
-    logging.info(f"Monks_{monks_counter} evaluate result accuracy: {score[1]} loss: {score[0]}\n")
+    logging.info(f"Monks_{monks_counter}_REG evaluate result accuracy: {score[1]} loss: {score[0]}\n")
