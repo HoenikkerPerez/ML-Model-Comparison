@@ -35,16 +35,19 @@ def monk_create_df(path):
     columns = ["id", "Class", "a1", "a2", "a3", "a4", "a5", "a6", "monk_id"]
     # skipping first 7 rows as they are comments and not actual data
     df = pd.read_csv(path, names=columns, delimiter=" ")
+
+    #shuffle dei dati
+    df = df.sample(frac=1).reset_index(drop=True)
+
     df = df.drop('id', axis='columns')
     df = df.drop("monk_id", axis='columns')
     return df
 
 
 def monk_split_data_target(df):
-    # ho modificato, mi servivano i dataframe e non i numpy array
     y = df["Class"]
     x = df.drop("Class", axis=1)
-    return x, y
+    return x.to_numpy(), y.to_numpy()
 
 def mean_euclidian_error_loss(y_true, pred_y):
     l2_norms = np.linalg.norm(y_true - pred_y, axis=1)
