@@ -21,11 +21,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 #GLOBAL VARIABLES
 EPOCHS = 5000
-VALIDATION_SPLIT_MONKS = 0.2
+VALIDATION_SPLIT_MONKS = 0.15
 VALIDATION_SPLIT_CUP = 0.2
 TEST_SIZE_MLCUP = 0.2
 EARLY_STOPPING_PATIENCE_CUP = 40
-EARLY_STOPPING_PATIENCE_MONK = 100
+EARLY_STOPPING_PATIENCE_MONK = 50
 
 KFOLD_SPLITS_CUP=5
 WORKERS_POOL=100
@@ -42,18 +42,13 @@ def mean_euclidian_error_loss(y_true, y_pred):
     return tf.keras.backend.mean(l2_norm, axis=0)
 
 
-def create_monks_nn(units=1, weights=0.5, lambda_reg=0.0, learning_rate=0.01, loss='mse'):
+def create_monks_nn(units=1, activation_function='relu', lambda_reg=0.0, learning_rate=0.01, loss='mse'):
     model = Sequential()
-    negative = -1 * weights
-    custom_weight_matrix = tf.keras.initializers.RandomUniform(
-        minval=-negative, maxval=weights, seed=None
-    )
 
-    model.add(Dense(units, activation='tanh',
-                    kernel_initializer=custom_weight_matrix,
+    model.add(Dense(units, activation=activation_function,
                     kernel_regularizer=l2(lambda_reg)))
     # output
-    model.add(Dense(1, activation='tanh', kernel_initializer=custom_weight_matrix,
+    model.add(Dense(1, activation=activation_function,
                     kernel_regularizer=l2(lambda_reg)))
 
     model.compile(loss=loss,
@@ -98,6 +93,7 @@ def mlcup_worker(parameters):
     lambda_reg = elem[4]
 
     val_loss_list = []
+    tr_loss_list = []
     k = 1
 
     for train_index, test_index in kf.split(input_train_df):
@@ -117,13 +113,18 @@ def mlcup_worker(parameters):
                             verbose=0)
 
         val_loss_list.append(history.history["val_loss"][-1])
+        tr_loss_list.append(history.history["loss"][-1])
 
-    np_array = np.array(val_loss_list)
+    val_loss_np_array = np.array(val_loss_list)
+    loss_np_array = np.array(tr_loss_list)
 
-    mean = np.mean(np_array)
-    std = np.std(np_array)
+    mean_val = np.mean(val_loss_np_array)
+    std_val = np.std(val_loss_np_array)
 
-    return_list.append([units, layers, learning_rate,activation_function, lambda_reg, mean, std])
+    mean_tr = np.mean(loss_np_array)
+    std_tr = np.std(loss_np_array)
+
+    return_list.append([units, layers, learning_rate,activation_function, lambda_reg, mean_tr, std_tr, mean_val, std_val])
 
 
 
@@ -136,15 +137,15 @@ def monks_worker(parameters):
     j = parameters[5]
 
     units = elem[0]
-    weights = elem[1]
+    activation_function = elem[1]
     learning_rate = elem[2]
     lambda_reg = elem[3]
-    activation_function = elem[4]
+    loss = elem[4]
 
     print(f"combination {j}/{n_combination}")
 
     model = create_monks_nn(units=units, learning_rate=learning_rate,
-                                weights=weights, lambda_reg=lambda_reg)
+                                activation_function=activation_function, lambda_reg=lambda_reg)
 
     stop_early_monks = tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=EARLY_STOPPING_PATIENCE_MONK)
     monks_callbacks = [stop_early_monks]
@@ -160,17 +161,17 @@ def monks_worker(parameters):
 
 
     return_list.append(
-        [units, weights, learning_rate, lambda_reg, activation_function, val_loss, val_accuracy])
+        [units, activation_function, learning_rate, lambda_reg, loss, val_loss, val_accuracy])
 
 
 def mlcup_model_selection(X_train, y_train):
 
     param_grid = {
-        "units": [1, 4, 16, 64, 128, 256, 512],
+        "units": [2, 4, 16, 32, 64, 128],
         'layers': [1, 2, 3, 4, 5],
         "learning_rate": [0.0001, 0.001, 0.01, 0.1],
         "activation_function": ['relu', 'elu', 'leakyrelu'],
-        "lambda_reg": [0.0, 0.00001, 0.0001, 0.001, 0.005, 0.01]
+        "lambda_reg": [0.0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 0.5]
     }
 
     keys = param_grid.keys()
@@ -179,6 +180,8 @@ def mlcup_model_selection(X_train, y_train):
     param_list = list(combinations)
     df_output_columns = list(param_grid.keys())
     dataframe_output_columns = df_output_columns
+    dataframe_output_columns.append("mean_tr_loss")
+    dataframe_output_columns.append("std_tr_loss")
     dataframe_output_columns.append("mean_val_loss")
     dataframe_output_columns.append("std_val_loss")
 
@@ -201,7 +204,7 @@ def mlcup_model_selection(X_train, y_train):
     args = []
     j = 1
 
-    pool = Pool(WORKERS_POOL)
+    pool = Pool()
 
     for elem in param_list:
         tmp = [elem, input_train_df, target_train_df, kf, n_combination, return_list, j]
@@ -216,7 +219,7 @@ def mlcup_model_selection(X_train, y_train):
 
         kfold_cv_df = pd.concat([kfold_cv_df, df_new_line], ignore_index=True)
 
-    kfold_cv_df.to_csv("./results/mlp/cup_results_GS.csv")
+    kfold_cv_df.to_csv("./results/mlp/cup_results_GS_new.csv")
 
     # get optimal hyperparameter values according to the minimum validation loss
     optimal_df = kfold_cv_df[kfold_cv_df.mean_val_loss == kfold_cv_df.mean_val_loss.min()]
@@ -228,7 +231,7 @@ def mlcup_model_selection(X_train, y_train):
     lambda_reg = optimal_df["lambda_reg"].values[0]
 
     logging.info(
-        f"MLCUP - lowest validation loss: {optimal_df['mean_val_loss'].values[0]} std {optimal_df['mean_val_loss'].values[0]} with units:{units} layers:{layers} learning_rate:{learning_rate} activation_function:{activation_function} lambda:{lambda_reg}")
+        f"MLCUP - lowest validation loss: {optimal_df['mean_val_loss'].values[0]} std {optimal_df['std_val_loss'].values[0]} with units:{units} layers:{layers} learning_rate:{learning_rate} activation_function:{activation_function} lambda:{lambda_reg}")
 
     #return optimal hyperpatameters
 
@@ -236,7 +239,6 @@ def mlcup_model_selection(X_train, y_train):
 
 
 def mlcup_model_assessment(optimal_df, X_train, y_train, X_test, y_test):
-    print(optimal_df)
     units = optimal_df["units"].values[0]
     layers = optimal_df["layers"].values[0]
     learning_rate = optimal_df["learning_rate"].values[0]
@@ -246,22 +248,38 @@ def mlcup_model_assessment(optimal_df, X_train, y_train, X_test, y_test):
     # retrain on all training set and use validation set for early stopping
     model = create_cup_nn(units=units, layers=layers, lambda_reg=lambda_reg, learning_rate=learning_rate,
                              activation_function=activation_function)
-    hisotry = model.fit(X_train, y_train, epochs=EPOCHS, validation_split=VALIDATION_SPLIT_CUP,
+    history = model.fit(X_train, y_train, epochs=EPOCHS, validation_split=VALIDATION_SPLIT_CUP,
                         callbacks=cup_callbacks)
     path="./results/mlp/images/"
-    plot_learning_curves_mlp(hisotry, path, "cup")
+    plot_learning_curves_mlp(history=history, path=path, name="cup", loss='MEE')
 
-    model.save("./results/mlp/models/cup_model")
+    model.save("./results/mlp/models/cup_model_1")
 
     # evaluate on the test set
     score = model.evaluate(X_test, y_test)
     print("Internal test set result for MLcup parallelized: {}\n".format(score))
 
+def mlcup_model_testing(path='', X_test=None, y_test=None):
+    #load model
+    model = tf.keras.models.load_model(path, custom_objects={'mean_euclidian_error_loss' : mean_euclidian_error_loss})
+    model.evaluate(X_test, y_test)
+
+def mlcup_model_prediction(path='', X_test=None):
+    # load model
+    model = tf.keras.models.load_model(path, custom_objects={'mean_euclidian_error_loss': mean_euclidian_error_loss})
+    result = model.predict(X_test)
+    x = result[:, 0]
+    y = result[:, 1]
+    data = {'x': x, 'y': y}
+    df = pd.DataFrame(data)
+    df.to_csv("./results/mlp/predictions.csv")
+    print(result)
+
 
 def monks_model_selection(X_train, y_train, monks_counter):
     param_grid = {
         "units": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        "weights": [0.1,0.2, 0.3, 0.5, 0.7],
+        "activation_function":["tanh",'relu'],
         "learning_rate": [0.0001, 0.001, 0.01, 0.1],
         "lambda_reg": [0.0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 0.5],
         #"lambda_reg":[0.0],
@@ -300,7 +318,7 @@ def monks_model_selection(X_train, y_train, monks_counter):
 
     for elem in return_list:
         df_new_line = pd.DataFrame([elem],
-                                   columns=["units", "weights", "learning_rate",
+                                   columns=["units", "activation_function", "learning_rate",
                                             "lambda_reg","loss","val_loss", "val_accuracy"])
         kfold_cv_df = pd.concat([kfold_cv_df, df_new_line], ignore_index=True)
 
@@ -316,15 +334,15 @@ def monks_model_selection(X_train, y_train, monks_counter):
 
 def monks_model_assessment(optimal_df, X_train, y_train, X_test, y_test, monks_counter):
     units = optimal_df["units"].values[0]
-    weights = optimal_df["weights"].values[0]
+    activation_function = optimal_df["activation_function"].values[0]
     learning_rate = optimal_df["learning_rate"].values[0]
     lambda_reg = optimal_df["lambda_reg"].values[0]
     loss = optimal_df["loss"].values[0]
 
     logging.info(
-        f"Highest validation accuracy: {optimal_df['val_accuracy'].values[0]} units {units} weights {weights} learning_rate {learning_rate} lambda {lambda_reg} loss {loss}")
+        f"Highest validation accuracy: {optimal_df['val_accuracy'].values[0]} units {units} activation_function {activation_function} learning_rate {learning_rate} lambda {lambda_reg} loss {loss}")
 
-    model = create_monks_nn(units=units, weights=weights, lambda_reg=lambda_reg, learning_rate=learning_rate, loss=loss)
+    model = create_monks_nn(units=units, activation_function=activation_function, lambda_reg=lambda_reg, learning_rate=learning_rate, loss=loss)
 
     stop_early_monks = tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=EARLY_STOPPING_PATIENCE_MONK)
     monks_callbacks = [stop_early_monks]
@@ -334,13 +352,18 @@ def monks_model_assessment(optimal_df, X_train, y_train, X_test, y_test, monks_c
                         epochs=EPOCHS,
                         validation_split=VALIDATION_SPLIT_MONKS,
                         callbacks=monks_callbacks,
-                        verbose=1)
+                        verbose=0)
 
+    val_loss = history.history["val_loss"][-1]
+    loss = history.history["loss"][-1]
+    val_accuracy = history.history["val_accuracy"][-1]
+    accuracy = history.history["accuracy"][-1]
+    logging.info(f"Monks_{monks_counter} training result loss:{loss} val_loss:{val_loss} accuracy:{accuracy} val_accuracy:{val_accuracy}\n")
     path = "./results/mlp/images/"
-    plot_learning_curves_mlp(history=history, path=path, name=f"Monks_{monks_counter}", loss=loss)
+    plot_learning_curves_mlp(history=history, path=path, name=f"Monks_{monks_counter}")
 
     model.save("./results/mlp/models/Monks_{}_REG_model".format(monks_counter))
 
     score = model.evaluate(X_test, y_test)
 
-    logging.info(f"Monks_{monks_counter}_REG evaluate result accuracy: {score[1]} loss: {score[0]}\n")
+    logging.info(f"Monks_{monks_counter} evaluate result accuracy: {score[1]} loss: {score[0]}\n")

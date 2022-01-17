@@ -97,11 +97,11 @@ for monk_idx in [3]:
     # starts model selection and returns dataframe with optimal hyperparameters
     optimal_df = monks_model_selection(X_train, y_train, monk_idx)
     # or read already saved csv file with results of the model selection
-    #holdout_df = pd.read_csv(f"./results/mlp/Monk_{monk_idx}_results_holdout.csv")
+    holdout_df = pd.read_csv(f"./results/mlp/Monk_{monk_idx}_results_holdout_REG.csv")
     # get optimal hyperparameter values according to the minimum validation loss
-    #optimal_df = holdout_df[holdout_df.val_accuracy == holdout_df.val_accuracy.max()]
-
+    optimal_df = holdout_df[holdout_df.val_accuracy == holdout_df.val_accuracy.max()]
     optimal_df = optimal_df[optimal_df.val_loss == optimal_df.val_loss.min()]
+
     # train a new MLP model and evaluate on test set
     monks_model_assessment(optimal_df=optimal_df, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, monks_counter=monk_idx)
 
