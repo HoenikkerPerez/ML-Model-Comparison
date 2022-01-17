@@ -111,6 +111,5 @@ save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_resul
 # optimal_df = kfold_cv_df[kfold_cv_df.mean_val_loss == kfold_cv_df.mean_val_loss.min()]
 # #train a new MLP model and evaluate on internal test set
 # mlcup_model_assessment(optimal_df, X_train, y_train, X_inner_test, y_inner_test)
-"""
 
 # predict_btest('data//ml-cup21//ML-CUP21-TS.csv', linear_gs)
