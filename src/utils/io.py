@@ -1,8 +1,6 @@
-import numpy as np
 import csv
-import pandas as pd
 
-from sklearn.pipeline import Pipeline
+import pandas as pd
 
 
 def _skip_first(seq, n):

@@ -17,8 +17,12 @@ def random_forest_model_selection(X_train, y_train, mode="regression"):
         print("--------- RANDOM FOREST REGRESSION MODEL SELECTION ---------")
 
         n_estimators = [1000, 5000]
-        max_depths = np.arange(5, 10)
+        max_depths = np.arange(14, 50)
         max_features = np.arange(1, X_train.shape[1])
+        # max_depths = [7]
+        n_estimators = [1000]
+
+        # max_features = [X_train.shape[1]]
         r_forest_gs = Pipeline([('scl', StandardScaler()),
                                 ('reg', RandomForestRegressor(random_state=42))])
 
@@ -30,10 +34,12 @@ def random_forest_model_selection(X_train, y_train, mode="regression"):
         scorer = make_scorer(mean_euclidian_error_loss, greater_is_better=False)
         # gs = GridSearchCV(estimator=pipe_svr, cv=5, param_grid=tuned_parameters, scoring=scorer, verbose=1, n_jobs=-1)
         gs = GridSearchCV(estimator=r_forest_gs,
-                          cv=5,
+                          cv=[(slice(None), slice(None))],
+                          verbose=10,
                           param_grid=tuned_parameters,
                           scoring=scorer,
-                          return_train_score=True)
+                          return_train_score=True,
+                          n_jobs=-1)
 
         gs.fit(X_train, y_train)
         for param in gs.best_params_:
