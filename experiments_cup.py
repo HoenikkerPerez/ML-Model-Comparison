@@ -36,7 +36,7 @@ y_train = target.to_numpy()
 X_train, X_inner_test, y_train, y_inner_test = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
 # MODELS:
 
-# LINEAR MODEL
+"""# LINEAR MODEL
 linear_gs = linear_model_selection(X_train, y_train)
 linear_mee = model_assessment(linear_gs, X_train, y_train, X_inner_test, y_inner_test)
 ###### save_gridsearch_results(linear_gs, "results/linear/linear_gs_results.csv")
@@ -106,7 +106,7 @@ random_forest_gs = random_forest_model_selection(X_train, y_train)
 plot_search_results(random_forest_gs, "ENSAMBLE SVR parameters")
 lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
 save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_results.csv")
-
+"""
 # PLOTS
 # all
 
