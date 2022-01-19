@@ -11,6 +11,7 @@ from src.utils.plots import plot_learning_curves_mlp
 import os
 from multiprocessing import Pool
 import multiprocessing as mp
+import time
 
 """0 = all messages are logged (default behavior)
 1 = INFO messages are not printed
@@ -101,9 +102,9 @@ def mlcup_worker(parameters):
     val_loss_list = []
     tr_loss_list = []
     k = 1
-
+    tic = time.perf_counter()
     for train_index, test_index in kf.split(input_train_df):
-        print(f"combination {j}/{n_combination} fold {k}/{kf.n_splits}")
+        # print(f"combination {j}/{n_combination} fold {k}/{kf.n_splits}")
         k += 1
         X_train_split, X_test_split = input_train_df.iloc[train_index, :], input_train_df.iloc[test_index, :]
         y_train_split, y_test_split = target_train_df.iloc[train_index, :], target_train_df.iloc[test_index, :]
@@ -121,6 +122,7 @@ def mlcup_worker(parameters):
         val_loss_list.append(history.history["val_loss"][-1])
         tr_loss_list.append(history.history["loss"][-1])
 
+
     val_loss_np_array = np.array(val_loss_list)
     loss_np_array = np.array(tr_loss_list)
 
@@ -131,6 +133,8 @@ def mlcup_worker(parameters):
     std_tr = np.std(loss_np_array)
 
     return_list.append([units, layers, learning_rate,activation_function, lambda_reg,reg_type, mean_tr, std_tr, mean_val, std_val])
+
+    print(f"END combination  {len(return_list)}/{n_combination}:({j}) \t {time.perf_counter()-tic}")
 
 
 
