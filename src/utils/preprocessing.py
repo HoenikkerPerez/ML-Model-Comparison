@@ -49,10 +49,13 @@ def monk_split_data_target(df):
     x = df.drop("Class", axis=1)
     return x.to_numpy(), y.to_numpy()
 
-def mean_euclidian_error_loss(y_true, pred_y):
-    l2_norms = np.linalg.norm(y_true - pred_y, axis=1)
-    return np.mean(l2_norms, axis=0)
 
+def mean_euclidian_error_loss(y_true, pred_y):
+    if y_true.ndim > 1:
+        l2_norms = np.linalg.norm(y_true - pred_y, axis=1)
+        return np.mean(l2_norms, axis=0)
+    else:
+        return np.mean(np.abs(y_true - pred_y))
 
 def create_monks_df(path):
     columns = ["class", "a1", "a2", "a3", "a4", "a5", "a6", "id"]

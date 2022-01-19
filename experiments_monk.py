@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection._split import train_test_split
 import os
 
-from src.mlp import monks_model_selection, monks_model_assessment
+# from src.mlp import monks_model_selection, monks_model_assessment
 
 from sklearn.preprocessing._encoders import OneHotEncoder
 
@@ -65,34 +65,34 @@ for monk_idx in [3]:
     X_test = one_hot_encoder.transform(X_test)
 
     # LINEAR MODEL WITH L1 REGULARIZATION
-    #lasso_gs = LASSO_model_selection(X_train, y_train, mode="classifier")
-    #plot_search_results(lasso_gs, "LASSO parameters", vmin=0.5, vmax=1.1)
-    #lasso_acc = model_assessment(lasso_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    lasso_gs = LASSO_model_selection(X_train, y_train, mode="classifier")
+    plot_search_results(lasso_gs, "LASSO parameters", vmin=0.5, vmax=1.1)
+    lasso_acc = model_assessment(lasso_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(lasso_gs, "../results/linear/lasso_gs_results.csv")
 
     # LINEAR MODEL WITH L2 REGULARIZATION
-    #ridge_gs = RIDGE_model_selection(X_train, y_train, mode="classifier")
-    #plot_search_results(ridge_gs, "RIDGE parameters", vmin=0.5, vmax=1.1)
-    #ridge_acc = model_assessment(ridge_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    ridge_gs = RIDGE_model_selection(X_train, y_train, mode="classifier")
+    plot_search_results(ridge_gs, "RIDGE parameters", vmin=0.5, vmax=1.1)
+    ridge_acc = model_assessment(ridge_gs.best_estimator_, X_train, y_train, X_test, y_test)
 
     # LINEAR MODEL WITH LBE AND REGULARIZATION
-    #lbe_reg_gs = linear_lbe_reg_model_selection(X_train, y_train, mode="classifier")
-    #plot_search_results(ridge_gs, "LBE WITH REGULARIZATION parameters", vmin=0.5, vmax=1.1)
-    #lbe_reg_mee = model_assessment(lbe_reg_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    lbe_reg_gs = linear_lbe_reg_model_selection(X_train, y_train, mode="classifier")
+    plot_search_results(ridge_gs, "LBE WITH REGULARIZATION parameters", vmin=0.5, vmax=1.1)
+    lbe_reg_mee = model_assessment(lbe_reg_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(lbe_reg_gs, "../results/linear/lbe_reg_results.csv")
 
     # SUPPORT VECTOR CLASSIFIER
-    #svc_gs = svc_model_selection(X_train, y_train)
-    #plot_search_results(svc_gs, "SVR parameters", vmin=0.5, vmax=1.1)
-    #svc_acc = model_assessment(svc_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    svc_gs = svc_model_selection(X_train, y_train)
+    plot_search_results(svc_gs, "SVR parameters", vmin=0.5, vmax=1.1)
+    svc_acc = model_assessment(svc_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(svc_gs, "results/svc/svc_results.csv")
 
     # RANDOM FOREST
-    #random_forest_gs = random_forest_model_selection(X_train, y_train, mode="classifier")
-    #plot_search_results(random_forest_gs, "RANDOM FOREST CLASS parameters", vmin=0.5, vmax=1.1)
-    #lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_test, y_test)
+    # random_forest_gs = random_forest_model_selection(X_train, y_train, mode="classifier")
+    # plot_search_results(random_forest_gs, "RANDOM FOREST CLASS parameters", vmin=0.5, vmax=1.1)
+    # lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_test, y_test)
     # save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_results.csv")
-
+    """
     # MLP
     # starts model selection and returns dataframe with optimal hyperparameters
     optimal_df = monks_model_selection(X_train, y_train, monk_idx)
@@ -105,52 +105,53 @@ for monk_idx in [3]:
     # train a new MLP model and evaluate on test set
     monks_model_assessment(optimal_df=optimal_df, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, monks_counter=monk_idx)
 
-
-# PLOTS
-# all
-
-
-"""# LINEAR MODEL
-linear_gs = linear_model_selection(X_train, y_train)
-linear_mee = model_assessment(linear_gs, X_train, y_train, X_inner_test, y_inner_test)
-###### save_gridsearch_results(linear_gs, "results/linear/linear_gs_results.csv")
-
-
-
-# LINEAR MODEL WITH LBE
-linear_lbe_gs = linear_lbe_regularized_model_selection(X_train, y_train)
-linear_lbe_mee = model_assessment(linear_lbe_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
-save_gridsearch_results(linear_lbe_gs, "results/linear/linear_lbe_regularized_gs_results.csv")
-
-
-
-
-
-# LINEAR MODEL WITH LBE AND REGULARIZATION
-lbe_reg_gs = linear_lbe_reg_model_selection(X_train, y_train)
-plot_search_results(ridge_gs, "LBE WITH REGULARIZATION parameters")
-lbe_reg_mee = model_assessment(lbe_reg_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
-save_gridsearch_results(lbe_reg_gs, "../results/linear/lbe_reg_results.csv")
-"""
-# SVR
-# svr_gs = svc_model_selection(X_train, y_train)
-#plot_search_results(svr_gs, "SVR parameters")
-#lbe_reg_mee = model_assessment(svr_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
-#save_gridsearch_results(svr_gs, "../results/svr/svr_results.csv")
-"""
-# ENSAMBLE SVR
-ens_svr_gs = ensamble_srv_model_selection(X_train, y_train)
-# plot_search_results(ens_svr_gs, "ENSAMBLE SVR parameters")
-lbe_reg_mee = model_assessment(ens_svr_gs, X_train, y_train, X_inner_test, y_inner_test)
-# save_gridsearch_results(ens_svr_gs, "../results/svr/ens_svr_results.csv")
-
-# RANDOM FOREST
-results_df = load_gridsearch_results("results/linear/linear_lbe_regularized_gs_results.csv")
-plot_search_df_results(results_df, "ENSAMBLE SVR parameters")
-random_forest_gs = random_forest_model_selection(X_train, y_train)
-plot_search_results(random_forest_gs, "ENSAMBLE SVR parameters")
-lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
-save_gridsearch_results(lbe_reg_mee, "../results/ranndom_forest/random_forest_results.csv")
-"""
-# PLOTS
-# all
+    """
+# # PLOTS
+# # all
+#
+#
+# """# LINEAR MODEL
+# linear_gs = linear_model_selection(X_train, y_train)
+# linear_mee = model_assessment(linear_gs, X_train, y_train, X_inner_test, y_inner_test)
+# ###### save_gridsearch_results(linear_gs, "results/linear/linear_gs_results.csv")
+#
+#
+#
+# # LINEAR MODEL WITH LBE
+# linear_lbe_gs = linear_lbe_regularized_model_selection(X_train, y_train)
+# linear_lbe_mee = model_assessment(linear_lbe_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
+# save_gridsearch_results(linear_lbe_gs, "results/linear/linear_lbe_regularized_gs_results.csv")
+#
+#
+#
+#
+#
+# # LINEAR MODEL WITH LBE AND REGULARIZATION
+# lbe_reg_gs = linear_lbe_reg_model_selection(X_train, y_train)
+# plot_search_results(ridge_gs, "LBE WITH REGULARIZATION parameters")
+# lbe_reg_mee = model_assessment(lbe_reg_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
+# save_gridsearch_results(lbe_reg_gs, "../results/linear/lbe_reg_results.csv")
+#
+# # SVR
+# # svr_gs = svc_model_selection(X_train, y_train)
+# #plot_search_results(svr_gs, "SVR parameters")
+# #lbe_reg_mee = model_assessment(svr_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
+# #save_gridsearch_results(svr_gs, "../results/svr/svr_results.csv")
+#
+# # ENSAMBLE SVR
+# ens_svr_gs = ensamble_srv_model_selection(X_train, y_train)
+# # plot_search_results(ens_svr_gs, "ENSAMBLE SVR parameters")
+# lbe_reg_mee = model_assessment(ens_svr_gs, X_train, y_train, X_inner_test, y_inner_test)
+# # save_gridsearch_results(ens_svr_gs, "../results/svr/ens_svr_results.csv")
+#
+# # RANDOM FOREST
+# results_df = load_gridsearch_results("results/linear/linear_lbe_regularized_gs_results.csv")
+# plot_search_df_results(results_df, "ENSAMBLE SVR parameters")
+# random_forest_gs = random_forest_model_selection(X_train, y_train)
+# plot_search_results(random_forest_gs, "ENSAMBLE SVR parameters")
+# lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
+# save_gridsearch_results(lbe_reg_mee, "../results/ranndom_forest/random_forest_results.csv")
+#
+# # PLOTS
+# # all
+# """

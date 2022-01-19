@@ -55,14 +55,14 @@ def plot_search_df_results(results, title):
     plt.show()
 
 
-def plot_search_results(grid, title, vmin=0, vmax=2):
+def plot_search_results(grid, title, vmin=0, vmax=3):
     # Results from grid search
     results = grid.cv_results_
     means_test = np.abs(results['mean_test_score'])
     stds_test = results['std_test_score']
     means_train = np.abs(results['mean_train_score'])
     stds_train = results['std_train_score']
-    removables = ["reg__estimator__", "reg__base_estimator__", "lbe__"]
+    removables = ["reg__estimator__", "reg__base_estimator__", "lbe__", "reg__"]
     # Getting indexes of values per hyper-parameter
     masks = []
     masks_names = list(grid.best_params_.keys())
@@ -132,8 +132,8 @@ def plot_search_results(grid, title, vmin=0, vmax=2):
 
 def plot_search_heatmap(grid, title, vmin=None, vmax=None, svm=True):
     if svm:
-        C_range = grid.param_grid['reg__base_estimator__C']
-        gamma_range = grid.param_grid['reg__base_estimator__gamma']
+        C_range = grid.param_grid['reg__C']
+        gamma_range = grid.param_grid['reg__gamma']
         xlabel="gamma"
         ylabel = "C"
     else:
@@ -254,7 +254,7 @@ def plot_mixed_kernel_results(filename, title="Mixed Kernel dependence of \u03C1
         ax[1].plot(df3["rho"], df3["mean_test"], "-"+cs[i]+ms[i], label="VS-MEE (d={})".format(i+1))
         ax[1].fill_between(df3["rho"], df3["mean_test"] + df3["std_test"], df3["mean_test"] - df3["std_test"], color=cs[i], alpha=0.2)
     ax[0].set_xlabel("\u03C1")
-    ax[1].set_ylim([1,1.5])
+    ax[1].set_ylim([.6,1])
     ax[0].set_title("Training Set")
     ax[1].set_xlabel("\u03C1")
     ax[1].set_title("Validation Set")
@@ -281,6 +281,6 @@ def plot_mixed_kernel_results(filename, title="Mixed Kernel dependence of \u03C1
     # ax[1].set_xlabel("rho")
     # ax[1].set_ylabel("MEE")
     # ax[1].set_title("Poly degree = 4")
-    plt.savefig('results/images/Mixed_Kernel_dependence_of_rho', bbox_inches='tight')
+    plt.savefig('results/images/'+ title.replace(" ", "_").replace("+", "_").replace("(", "").replace(")", ""), bbox_inches='tight')
     plt.show()
-    exit()
+    # exit()

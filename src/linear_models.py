@@ -173,9 +173,12 @@ def LASSO_model_selection(X_train, y_train, mode="regression"):
                           return_train_score=True)
 
         gs.fit(X_train, y_train)
+
         for param in gs.best_params_:
             print(param + ": " + str(gs.best_params_[param]))
         print("ACCURACY: %0.2f" % abs(gs.best_score_))
+        print("TRAIN: {:.3f} ({:.3f})".format(gs.cv_results_["mean_train_score"][gs.best_index_], gs.cv_results_["std_train_score"][gs.best_index_]))
+        print("VALID: {:.3f} ({:.3f})".format(gs.cv_results_["mean_test_score"][gs.best_index_], gs.cv_results_["std_test_score"][gs.best_index_]))
         return gs
 
 def RIDGE_plot_coefficients(X_train, y_train, mode="regression"):
@@ -255,6 +258,9 @@ def RIDGE_model_selection(X_train, y_train, mode="regression"):
         for param in gs.best_params_:
             print(param + ": " + str(gs.best_params_[param]))
         print("ACCURACY: %0.2f" % abs(gs.best_score_))
+        print("TRAIN: {:.3f} ({:.3f})".format(gs.cv_results_["mean_train_score"][gs.best_index_], gs.cv_results_["std_train_score"][gs.best_index_]))
+        print("VALID: {:.3f} ({:.3f})".format(gs.cv_results_["mean_test_score"][gs.best_index_], gs.cv_results_["std_test_score"][gs.best_index_]))
+
         return gs
 
 def linear_lbe_reg_plot_coefficients(X_train, y_train, mode="regression"):
@@ -376,6 +382,9 @@ def linear_lbe_reg_model_selection(X_train, y_train, mode="regression"):
         for param in gs.best_params_:
             print(param + ": " + str(gs.best_params_[param]))
         print("ACCURACY: %0.2f" % abs(gs.best_score_))
+        print("TRAIN: {:.3f} ({:.3f})".format(gs.cv_results_["mean_train_score"][gs.best_index_], gs.cv_results_["std_train_score"][gs.best_index_]))
+        print("VALID: {:.3f} ({:.3f})".format(gs.cv_results_["mean_test_score"][gs.best_index_], gs.cv_results_["std_test_score"][gs.best_index_]))
+
         return gs
 
 
@@ -383,7 +392,7 @@ def model_assessment(model, X_train, y_train, X_test, y_test):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     mee = mean_euclidian_error_loss(y_pred, y_test)
-    print("[Model Assessment] MEE: %0.2f" % abs(mee))
+    print("[Model Assessment] MEE: %0.3f" % abs(mee))
     print("------------------------------------")
     print()
     return mee
