@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Dense
-from tensorflow.keras.regularizers import l2
+from tensorflow.keras.regularizers import l2,l1
 from tensorflow.keras.models import Sequential
 import itertools as it
 import pandas as pd
@@ -57,7 +57,7 @@ def create_monks_nn(units=1, activation_function='relu', lambda_reg=0.0, learnin
 
     return model
 
-def create_cup_nn(units=1, layers=1, lambda_reg=0.0, activation_function='relu', learning_rate=0.01):
+def create_cup_nn(units=1, layers=1, lambda_reg=0.0, activation_function='relu', learning_rate=0.01, reg_type='l2'):
     model = Sequential()
 
     if activation_function == 'relu':
@@ -67,11 +67,16 @@ def create_cup_nn(units=1, layers=1, lambda_reg=0.0, activation_function='relu',
     elif activation_function == 'leakyrelu':
         act = tf.keras.layers.LeakyReLU()
 
+    if reg_type == 'ridge':
+        reg = l2(lambda_reg)
+    if reg_type == 'lasso':
+        reg = l1(lambda_reg)
+
     for i in range(0, layers):
         model.add(tf.keras.layers.Dense(units=units, activation=act,
-                    kernel_regularizer=l2(lambda_reg)))
+                    kernel_regularizer=reg))
 
-    model.add(tf.keras.layers.Dense(2, activation='linear', kernel_regularizer=l2(lambda_reg)))
+    model.add(tf.keras.layers.Dense(2, activation='linear', kernel_regularizer=reg))
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), loss=mean_euclidian_error_loss)
 
@@ -91,6 +96,7 @@ def mlcup_worker(parameters):
     learning_rate = elem[2]
     activation_function = elem[3]
     lambda_reg = elem[4]
+    reg_type = elem[5]
 
     val_loss_list = []
     tr_loss_list = []
@@ -104,7 +110,7 @@ def mlcup_worker(parameters):
 
         model = create_cup_nn(units=units, learning_rate=learning_rate,
                                  activation_function=activation_function, layers=layers,
-                                 lambda_reg=lambda_reg)
+                                 lambda_reg=lambda_reg, reg_type=reg_type)
 
         history = model.fit(X_train_split, y_train_split,
                             validation_data=(X_test_split, y_test_split),
@@ -124,7 +130,7 @@ def mlcup_worker(parameters):
     mean_tr = np.mean(loss_np_array)
     std_tr = np.std(loss_np_array)
 
-    return_list.append([units, layers, learning_rate,activation_function, lambda_reg, mean_tr, std_tr, mean_val, std_val])
+    return_list.append([units, layers, learning_rate,activation_function, lambda_reg,reg_type, mean_tr, std_tr, mean_val, std_val])
 
 
 
@@ -167,11 +173,12 @@ def monks_worker(parameters):
 def mlcup_model_selection(X_train, y_train):
 
     param_grid = {
-        "units": [2, 4, 16, 32, 64, 128],
+        "units": [2, 8, 16, 32, 64, 128],
         'layers': [1, 2, 3, 4, 5],
         "learning_rate": [0.0001, 0.001, 0.01, 0.1],
         "activation_function": ['relu', 'elu', 'leakyrelu'],
-        "lambda_reg": [0.0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 0.5]
+        "lambda_reg": [0.0, 0.00001, 0.0001, 0.001, 0.01, 0.1],
+        "reg_type":['lasso','ridge']
     }
 
     keys = param_grid.keys()
@@ -219,7 +226,7 @@ def mlcup_model_selection(X_train, y_train):
 
         kfold_cv_df = pd.concat([kfold_cv_df, df_new_line], ignore_index=True)
 
-    kfold_cv_df.to_csv("./results/mlp/cup_results_GS_new.csv")
+    kfold_cv_df.to_csv("./results/mlp/cup_results_GS_reg.csv")
 
     # get optimal hyperparameter values according to the minimum validation loss
     optimal_df = kfold_cv_df[kfold_cv_df.mean_val_loss == kfold_cv_df.mean_val_loss.min()]
@@ -229,9 +236,10 @@ def mlcup_model_selection(X_train, y_train):
     learning_rate = optimal_df["learning_rate"].values[0]
     activation_function = optimal_df["activation_function"].values[0]
     lambda_reg = optimal_df["lambda_reg"].values[0]
+    reg_type = optimal_df["reg_type"].values[0]
 
     logging.info(
-        f"MLCUP - lowest validation loss: {optimal_df['mean_val_loss'].values[0]} std {optimal_df['std_val_loss'].values[0]} with units:{units} layers:{layers} learning_rate:{learning_rate} activation_function:{activation_function} lambda:{lambda_reg}")
+        f"MLCUP - lowest validation loss: {optimal_df['mean_val_loss'].values[0]} std {optimal_df['std_val_loss'].values[0]} with units:{units} layers:{layers} learning_rate:{learning_rate} activation_function:{activation_function} reg_type:{reg_type} lambda:{lambda_reg}")
 
     #return optimal hyperpatameters
 
@@ -244,20 +252,22 @@ def mlcup_model_assessment(optimal_df, X_train, y_train, X_test, y_test):
     learning_rate = optimal_df["learning_rate"].values[0]
     activation_function = optimal_df["activation_function"].values[0]
     lambda_reg = optimal_df["lambda_reg"].values[0]
+    reg_type = optimal_df["reg_type"].values[0]
 
     # retrain on all training set and use validation set for early stopping
     model = create_cup_nn(units=units, layers=layers, lambda_reg=lambda_reg, learning_rate=learning_rate,
-                             activation_function=activation_function)
+                             activation_function=activation_function, reg_type=reg_type)
+
     history = model.fit(X_train, y_train, epochs=EPOCHS, validation_split=VALIDATION_SPLIT_CUP,
                         callbacks=cup_callbacks)
     path="./results/mlp/images/"
     plot_learning_curves_mlp(history=history, path=path, name="cup", loss='MEE')
 
-    model.save("./results/mlp/models/cup_model_1")
+    model.save("./results/mlp/models/cup_model_reg")
 
     # evaluate on the test set
     score = model.evaluate(X_test, y_test)
-    print("Internal test set result for MLcup parallelized: {}\n".format(score))
+    print("Internal test set result for MLcup: {}\n".format(score))
 
 def mlcup_model_testing(path='', X_test=None, y_test=None):
     #load model

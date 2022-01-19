@@ -112,16 +112,16 @@ save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_resul
 
 # # MLP
 # # starts model selection and returns dataframe with optimal hyperparameters
-# # optimal_df = mlcup_model_selection(X_train, y_train)
+optimal_df = mlcup_model_selection(X_train, y_train)
 # # or read already saved csv file with results of the model selection
-# kfold_cv_df = pd.read_csv("./results/mlp/cup_results_GS.csv")
+kfold_cv_df = pd.read_csv("./results/mlp/cup_results_reg.csv")
 # get optimal hyperparameter values according to the minimum validation loss
-# optimal_df = kfold_cv_df[kfold_cv_df.mean_val_loss == kfold_cv_df.mean_val_loss.min()]
+optimal_df = kfold_cv_df[kfold_cv_df.mean_val_loss == kfold_cv_df.mean_val_loss.min()]
 # #train a new MLP model and evaluate on internal test set
-# mlcup_model_assessment(optimal_df, X_train, y_train, X_inner_test, y_inner_test)
+mlcup_model_assessment(optimal_df, X_train, y_train, X_inner_test, y_inner_test)
 
 #load model and test it
-path="./results/mlp/models/cup_model_1"
+path="./results/mlp/models/cup_model_reg"
 mlcup_model_testing(path, X_inner_test, y_inner_test)
 
 #prediction
