@@ -1,14 +1,14 @@
 from sklearn.model_selection._split import train_test_split
 import os
 
-#from src.ensamble_svr import ensamble_srv_model_selection, mixed_kernel_srv_model_selection
-"""from src.linear_models import linear_model_selection, model_assessment, linear_lbe_regularized_model_selection, \
+from src.ensamble_svr import ensamble_srv_model_selection, mixed_kernel_srv_model_selection
+from src.linear_models import linear_model_selection, model_assessment, linear_lbe_regularized_model_selection, \
     LASSO_model_selection, RIDGE_model_selection, linear_lbe_reg_model_selection, LASSO_plot_coefficients, \
     RIDGE_plot_coefficients, linear_lbe_reg_plot_coefficients
 from src.random_forest import random_forest_model_selection
 from src.svm import svr_model_selection, svr_poly_gridsearch, svr_poly_time_analysis
 from src.utils.io import save_gridsearch_results, load_gridsearch_results
-from src.utils.plots import plot_search_results, plot_search_df_results, plot_search_heatmap, plot_mixed_kernel_results"""
+from src.utils.plots import plot_search_results, plot_search_df_results, plot_search_heatmap, plot_mixed_kernel_results
 from src.mlp import mlcup_model_selection, mlcup_model_assessment, mlcup_model_testing, mlcup_model_prediction
 from src.utils.preprocessing import cup_create_df, cup_split_data_target
 
@@ -37,7 +37,6 @@ X_train, X_inner_test, y_train, y_inner_test = train_test_split(X_train, y_train
 # MODELS:
 
 # LINEAR MODEL
-"""
 linear_gs = linear_model_selection(X_train, y_train)
 linear_mee = model_assessment(linear_gs, X_train, y_train, X_inner_test, y_inner_test)
 ###### save_gridsearch_results(linear_gs, "results/linear/linear_gs_results.csv")
@@ -80,10 +79,12 @@ svr_poly_time_analysis(X_train, y_train)
 print("*****************  END POLYNOMIAL ***********************")
 
 svr_gs = svr_model_selection(X_train, y_train)
-plot_search_results(svr_gs, "SVR parameters")
+# plot_search_results(svr_gs, "SVR parameters")
+
+# svr_gs = MultioutSVR([svr_gs0.best_estimator_, svr_gs1.best_estimator_])
 # plot_search_heatmap(svr_gs, "SVR Gridsearch")
-lbe_reg_mee = model_assessment(svr_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
-save_gridsearch_results(svr_gs, "results/svr/svr_results.csv")
+lbe_reg_mee = model_assessment(svr_gs, X_train, y_train, X_inner_test, y_inner_test)
+# save_gridsearch_results(svr_gs, "results/svr/svr_results.csv")
 
 
 # ENSAMBLE SVR
@@ -104,7 +105,7 @@ mk_svr_mee = model_assessment(mk_svr_gs, X_train, y_train, X_inner_test, y_inner
 random_forest_gs = random_forest_model_selection(X_train, y_train)
 plot_search_results(random_forest_gs, "ENSAMBLE SVR parameters")
 lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
-save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_results.csv")"""
+save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_results.csv")
 
 # PLOTS
 # all
