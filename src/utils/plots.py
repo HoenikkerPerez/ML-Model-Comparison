@@ -55,7 +55,7 @@ def plot_search_df_results(results, title):
     plt.show()
 
 
-def plot_search_results(grid, title, vmin=0, vmax=3):
+def plot_search_results(grid, title, vmin=0, vmax=3, save=True):
     # Results from grid search
     results = grid.cv_results_
     means_test = np.abs(results['mean_test_score'])
@@ -126,11 +126,12 @@ def plot_search_results(grid, title, vmin=0, vmax=3):
                 break
         ax.set_xlabel(xlabel)
     plt.legend()
-    plt.savefig('results/images/'+ title.replace(" ", "_").replace("+", "_"), bbox_inches='tight')
+    if save:
+        plt.savefig('results/images/'+ title.replace(" ", "_").replace("+", "_"), bbox_inches='tight')
     plt.show()
 
 
-def plot_search_heatmap(grid, title, vmin=None, vmax=None, svm=True):
+def plot_search_heatmap(grid, title, vmin=None, vmax=None, svm=True, save=True):
     if svm:
         C_range = grid.param_grid['reg__C']
         gamma_range = grid.param_grid['reg__gamma']
@@ -160,7 +161,8 @@ def plot_search_heatmap(grid, title, vmin=None, vmax=None, svm=True):
     plt.xticks(np.arange(len(gamma_range)), gamma_range, rotation=45)
     plt.yticks(np.arange(len(C_range)), C_range)
     plt.title(title)
-    plt.savefig('results/images/' + title.replace(" ", "_").replace("+", "_"), bbox_inches='tight')
+    if save:
+        plt.savefig('results/images/' + title.replace(" ", "_").replace("+", "_"), bbox_inches='tight')
     plt.show()
 
     # TRAIN SCORE GRIDSEARCH
@@ -182,7 +184,8 @@ def plot_search_heatmap(grid, title, vmin=None, vmax=None, svm=True):
     plt.xticks(np.arange(len(gamma_range)), gamma_range, rotation=45)
     plt.yticks(np.arange(len(C_range)), C_range)
     plt.title(title+ "[TRAIN MEE]")
-    plt.savefig('results/images/' + title.replace(" ", "_").replace("+", "_") + "_train", bbox_inches='tight')
+    if save:
+        plt.savefig('results/images/' + title.replace(" ", "_").replace("+", "_") + "_train", bbox_inches='tight')
     plt.show()
 
     # TRAIN TIME GRIDSEARCH
@@ -204,10 +207,11 @@ def plot_search_heatmap(grid, title, vmin=None, vmax=None, svm=True):
     plt.xticks(np.arange(len(gamma_range)), gamma_range, rotation=45)
     plt.yticks(np.arange(len(C_range)), C_range)
     plt.title(title + "[TIME]")
-    plt.savefig('results/images/' + title.replace(" ", "_").replace("+", "_") + "_time", bbox_inches='tight')
+    if save:
+        plt.savefig('results/images/' + title.replace(" ", "_").replace("+", "_") + "_time", bbox_inches='tight')
     plt.show()
 
-def plot_learning_curves_mlp(history=None, path='', name='', loss='MSE'):
+def plot_learning_curves_mlp(history=None, path='', name='', loss='MSE', save=True):
     plt.figure()
     plt.plot(history.history["loss"], label="Training Loss")
     plt.plot(history.history["val_loss"], label="Validation Loss", linestyle='dashed')
@@ -216,7 +220,8 @@ def plot_learning_curves_mlp(history=None, path='', name='', loss='MSE'):
     plt.xlabel("EPOCHS")
     plt.legend()
     new_path=path+"{}_REG_loss.png".format(name)
-    plt.savefig(new_path)
+    if save:
+        plt.savefig(new_path)
 
     if "accuracy" in history.history.keys():
         plt.figure()
@@ -227,11 +232,12 @@ def plot_learning_curves_mlp(history=None, path='', name='', loss='MSE'):
         plt.xlabel("EPOCHS")
         plt.legend()
         new_path = path + "{}_REG_accuracy.png".format(name)
-        plt.savefig(new_path)
+        if save:
+            plt.savefig(new_path)
 
     plt.show()
 
-def plot_mixed_kernel_results(filename0, filename1, title="Mixed Kernel dependence of \u03C1", vmin=0, vmax=1):
+def plot_mixed_kernel_results(filename0, filename1, title="Mixed Kernel dependence of \u03C1", vmin=0, vmax=1, save=True):
     df0 = pd.read_csv(filename0,sep=",")
     df0 = df0.sort_values(by=['mean_test'])
     df1 = pd.read_csv(filename1, sep=",")
@@ -269,13 +275,13 @@ def plot_mixed_kernel_results(filename0, filename1, title="Mixed Kernel dependen
     ax[1].legend()
 
     ax[1].legend()
-
-    plt.savefig('results/images/Mixed_Kernel_dependence_of_rho', bbox_inches='tight')
+    if save:
+        plt.savefig('results/images/Mixed_Kernel_dependence_of_rho', bbox_inches='tight')
     plt.show()
     # exit()
 
 
-def plot_mixed_kernel_results_multidegree(filename, title="Mixed Kernel dependence of \u03C1", vmin=0, vmax=1):
+def plot_mixed_kernel_results_multidegree(filename, title="Mixed Kernel dependence of \u03C1", vmin=0, vmax=1, save=True):
     df = pd.read_csv(filename,sep=",")
     df = df.sort_values(by=['mean_test'])
     print(df.head())
@@ -325,6 +331,7 @@ def plot_mixed_kernel_results_multidegree(filename, title="Mixed Kernel dependen
     # ax[1].set_xlabel("rho")
     # ax[1].set_ylabel("MEE")
     # ax[1].set_title("Poly degree = 4")
-    plt.savefig('results/images/'+ title.replace(" ", "_").replace("+", "_").replace("(", "").replace(")", ""), bbox_inches='tight')
+    if save:
+        plt.savefig('results/images/'+ title.replace(" ", "_").replace("+", "_").replace("(", "").replace(")", ""), bbox_inches='tight')
     plt.show()
     # exit()
