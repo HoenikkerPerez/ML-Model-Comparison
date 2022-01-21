@@ -10,10 +10,9 @@ from sklearn.linear_model._ridge import Ridge
 from sklearn.linear_model._stochastic_gradient import SGDClassifier
 from sklearn.metrics._scorer import make_scorer
 from sklearn.model_selection._search import GridSearchCV
-from sklearn.model_selection._validation import cross_val_score, cross_validate
+from sklearn.model_selection._validation import cross_validate
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing._data import StandardScaler
 from sklearn.preprocessing._polynomial import PolynomialFeatures, SplineTransformer
 from sklearn.utils._testing import ignore_warnings
 
@@ -32,9 +31,7 @@ class MultioutputLineamModel(BaseEstimator, RegressorMixin):
     Wrapper class for Multioutput SVR. It can contains different SVR models.py
     Multioutput Class of Sklearn contains instead multiple estimator trained on same hyperparameters
     """
-    def __init__(self, lm0, lm1, alpha0=None, alpha1=None, gamma0=None, gamma1=None):
-        self.gamma1 = gamma1
-        self.gamma0 = gamma0
+    def __init__(self, lm0, lm1, alpha0=None, alpha1=None):
         self.alpha1 = alpha1
         self.alpha0 = alpha0
         self.lm0 = lm0
@@ -341,7 +338,7 @@ def linear_lbe_reg_plot_coefficients(X_train, y_train, mode="regression"):
         coefs.append(ridge["reg"].coef_)
         # INPUT: 1181->1001 with all poly terms
         # INPUT: 1181->386 with only interaction terms [interaction_only=True)]
-        # print("#INPUT: {}->{}".format(X_train.shape[1], len(ridge["reg"].coef_)))
+        print("#INPUT: {}->{}".format(X_train.shape[1], len(ridge["reg"].coef_)))
     # Display results
     ax = plt.gca()
 
@@ -382,11 +379,16 @@ def linear_lbe_reg_model_selection(X_train, y_train, mode="regression"):
         n_alpha = 10
         alpha_range = np.logspace(-4, 0, n_alpha)
 
-        param_grid = [
-            {'lbe': [PolynomialFeatures()], 'lbe__degree': degrees, 'reg__estimator__alpha': alpha_range,
-             'reg': regressor},
-            {'lbe': [SplineTransformer()], 'lbe__degree': degrees, 'lbe__n_knots': n_knots,
-             'reg__estimator__alpha': alpha_range, 'reg': regressor}]
+        # # TODO remove
+        # n_alpha = 3
+        # degrees = np.arange(2, 4)
+        # alpha_range = np.logspace(-4, 0, n_alpha)
+        # # TODO endremove
+        # param_grid = [
+        #     {'lbe': [PolynomialFeatures()], 'lbe__degree': degrees, 'reg__estimator__alpha': alpha_range,
+        #      'reg': regressor},
+        #     {'lbe': [SplineTransformer()], 'lbe__degree': degrees, 'lbe__n_knots': n_knots,
+        #      'reg__estimator__alpha': alpha_range, 'reg': regressor}]
         param_grid = {'lbe__degree': degrees, 'reg__estimator__alpha': alpha_range}
         # Gridsearch
         scorer = make_scorer(mean_euclidian_error_loss, greater_is_better=False)
@@ -446,7 +448,6 @@ def linear_lbe_reg_model_selection(X_train, y_train, mode="regression"):
 def model_assessment(model, X_train, y_train, X_test, y_test):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    print(y_pred[:5, :])
     mee = mean_euclidian_error_loss(y_pred, y_test)
     print("[Model Assessment] MEE: %0.3f" % abs(mee))
     print("------------------------------------")

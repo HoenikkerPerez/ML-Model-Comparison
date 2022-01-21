@@ -231,17 +231,61 @@ def plot_learning_curves_mlp(history=None, path='', name='', loss='MSE'):
 
     plt.show()
 
-def plot_mixed_kernel_results(filename, title="Mixed Kernel dependence of \u03C1"):
+def plot_mixed_kernel_results(filename0, filename1, title="Mixed Kernel dependence of \u03C1", vmin=0, vmax=1):
+    df0 = pd.read_csv(filename0,sep=",")
+    df0 = df0.sort_values(by=['mean_test'])
+    df1 = pd.read_csv(filename1, sep=",")
+    df1 = df0.sort_values(by=['mean_test'])
+
+    fig, ax = plt.subplots(1,2,figsize=(8, 4))
+    # fig, ax = plt.subplots(1)
+    fig.suptitle(title)
+
+    df0 = df0.sort_values(by=['rho'])
+    df0 = df0.loc[df0.groupby('rho')['mean_test'].idxmin()]
+    # ax.set_xscale('log')
+    ax[0].plot(df0["rho"], df0["mean_train"], "--bo", label="TR-MEE ")
+    ax[0].fill_between(df0["rho"], df0["mean_train"] + df0["std_train"], df0["mean_train"] - df0["std_train"], color="b", alpha=0.2)
+    ax[0].plot(df0["rho"], df0["mean_test"], "-go", label="VS-MEE")
+    ax[0].fill_between(df0["rho"], df0["mean_test"] + df0["std_test"], df0["mean_test"] - df0["std_test"], color="g", alpha=0.2)
+    ax[0].set_xlabel("\u03C1")
+    # ax[1].set_ylim([vmin,vmax])
+    ax[0].set_title("Y0")
+    ax[0].set_xlabel("\u03C1")
+    ax[0].set_ylabel("MEE")
+    ax[0].legend()
+
+    df1 = df1.sort_values(by=['rho'])
+    df1 = df1.loc[df1.groupby('rho')['mean_test'].idxmin()]
+    # ax.set_xscale('log')
+    ax[1].plot(df1["rho"], df1["mean_train"], "--bo", label="TR-MEE ")
+    ax[1].fill_between(df1["rho"], df1["mean_train"] + df1["std_train"], df1["mean_train"] - df1["std_train"], color="b", alpha=0.2)
+    ax[1].plot(df1["rho"], df1["mean_test"], "-go", label="VS-MEE")
+    ax[1].fill_between(df1["rho"], df1["mean_test"] + df1["std_test"], df1["mean_test"] - df1["std_test"], color="g", alpha=0.2)
+    ax[1].set_xlabel("\u03C1")
+    # ax[1].set_ylim([vmin,vmax])
+    ax[1].set_title("Y1")
+    ax[1].set_xlabel("\u03C1")
+    ax[1].legend()
+
+    ax[1].legend()
+
+    plt.savefig('results/images/Mixed_Kernel_dependence_of_rho', bbox_inches='tight')
+    plt.show()
+    # exit()
+
+
+def plot_mixed_kernel_results_multidegree(filename, title="Mixed Kernel dependence of \u03C1", vmin=0, vmax=1):
     df = pd.read_csv(filename,sep=",")
     df = df.sort_values(by=['mean_test'])
     print(df.head())
 
-    fig, ax = plt.subplots(1,2, sharex='none', figsize=(8, 4))
+    fig, ax = plt.subplots(1,2, sharex='none',sharey=True ,figsize=(8, 4))
     # fig, ax = plt.subplots(1)
     fig.suptitle(title)
-    ms = ["s","^","P","*"]
-    cs = ["b","g","r","y"]
-    for i in range(4):
+    ms = ["s","^","P","*","+", "8"]
+    cs = ["b","g","r","y", "m", "c"]
+    for i in range(5):
         # degree=3
         df3 = df[df["d"]==i+1]
         # df3 = df3[df3["g_p"]==.1]
@@ -254,7 +298,7 @@ def plot_mixed_kernel_results(filename, title="Mixed Kernel dependence of \u03C1
         ax[1].plot(df3["rho"], df3["mean_test"], "-"+cs[i]+ms[i], label="VS-MEE (d={})".format(i+1))
         ax[1].fill_between(df3["rho"], df3["mean_test"] + df3["std_test"], df3["mean_test"] - df3["std_test"], color=cs[i], alpha=0.2)
     ax[0].set_xlabel("\u03C1")
-    ax[1].set_ylim([.6,1])
+    # ax[1].set_ylim([vmin,vmax])
     ax[0].set_title("Training Set")
     ax[1].set_xlabel("\u03C1")
     ax[1].set_title("Validation Set")
