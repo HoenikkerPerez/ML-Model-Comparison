@@ -37,7 +37,7 @@ if __name__ == '__main__':
     X_train, X_inner_test, y_train, y_inner_test = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
     # MODELS:
 
-    """# LINEAR MODEL
+    # LINEAR MODEL
     linear_gs = linear_model_selection(X_train, y_train)
     linear_mee = model_assessment(linear_gs, X_train, y_train, X_inner_test, y_inner_test)
     ###### save_gridsearch_results(linear_gs, "results/linear/linear_gs_results.csv")
@@ -47,14 +47,14 @@ if __name__ == '__main__':
     linear_lbe_gs = linear_lbe_regularized_model_selection(X_train, y_train)
     linear_lbe_mee = model_assessment(linear_lbe_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
     # save_gridsearch_results(linear_lbe_gs, "results/linear/linear_lbe_regularized_gs_results.csv")
-    
+   
     # LINEAR MODEL WITH L1 REGULARIZATION
     lasso_gs = LASSO_model_selection(X_train, y_train)
     
     LASSO_plot_coefficients(X_train, y_train)
-    plot_search_results(lasso_gs, "LASSO parameters")
-    lasso_gs_mee = model_assessment(lasso_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
-    save_gridsearch_results(lasso_gs, "results/linear/lasso_gs_results.csv")
+    # plot_search_results(lasso_gs, "LASSO parameters")
+    lasso_gs_mee = model_assessment(lasso_gs, X_train, y_train, X_inner_test, y_inner_test)
+    # save_gridsearch_results(lasso_gs, "results/linear/lasso_gs_results.csv")
     
     # LINEAR MODEL WITH L2 REGULARIZATION
     ridge_gs = RIDGE_model_selection(X_train, y_train)
@@ -64,13 +64,14 @@ if __name__ == '__main__':
     save_gridsearch_results(ridge_gs, "results/linear/ridge_gs_results.csv")
     
     # LINEAR MODEL WITH LBE AND REGULARIZATION
-    linear_lbe_reg_plot_coefficients(X_train, y_train)
+    # linear_lbe_reg_plot_coefficients(X_train, y_train)
     lbe_reg_gs = linear_lbe_reg_model_selection(X_train, y_train)
-    plot_search_results(lbe_reg_gs, "LBE + Linear + Regularization parameters")
-    plot_search_heatmap(lbe_reg_gs, "LBE + Linear + Regularization", svm=False)
+    # plot_search_results(lbe_reg_gs, "LBE + Linear + Regularization parameters")
+    # plot_search_heatmap(lbe_reg_gs, "LBE + Linear + Regularization", svm=False)
     lbe_reg_mee = model_assessment(lbe_reg_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
     save_gridsearch_results(lbe_reg_gs, "results/linear/lbe_reg_results.csv")
-    
+    exit(0)
+    """
     
     # SVR
     print("*****************   POLYNOMIAL ***********************")
@@ -79,14 +80,10 @@ if __name__ == '__main__':
     # lbe_reg_mee = model_assessment(svr_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
     print("*****************  END POLYNOMIAL ***********************")
     
-    svr_gs = svr_model_selection(X_train, y_train)
-    # plot_search_results(svr_gs, "SVR parameters")
-    
-    # svr_gs = MultioutSVR([svr_gs0.best_estimator_, svr_gs1.best_estimator_])
-    # plot_search_heatmap(svr_gs, "SVR Gridsearch")
-    lbe_reg_mee = model_assessment(svr_gs, X_train, y_train, X_inner_test, y_inner_test)
-    # save_gridsearch_results(svr_gs, "results/svr/svr_results.csv")
-    
+    """
+    # svr_gs = svr_model_selection(X_train, y_train)
+    # lbe_reg_mee = model_assessment(svr_gs, X_train, y_train, X_inner_test, y_inner_test)
+    """
     
     # ENSAMBLE SVR
     ens_svr_gs = ensamble_srv_model_selection(X_train, y_train)
@@ -94,12 +91,13 @@ if __name__ == '__main__':
     ens_svr_mee = model_assessment(ens_svr_gs, X_train, y_train, X_inner_test, y_inner_test)
     # save_gridsearch_results(ens_svr_gs, "../results/svr/ens_svr_results.csv")
     
-    
+    """
     # MIXED KERNELS
     mk_svr_gs = mixed_kernel_srv_model_selection(X_train, y_train)
-    plot_mixed_kernel_results('results/svr/mixed_kernels.csv')
+    plot_mixed_kernel_results('results/svr/results_mixed_kernel0def.csv','results/svr/results_mixed_kernel1def.csv', title="Mixed Kernel dependence of \u03C1") #results/svr/results_mixed_kernel1def.csv
+    # plot_mixed_kernel_results('results_mixed_kernel1def.csv',title="Mixed Kernel dependence of \u03C1 (Y1)", vmin=.8, vmax=1) #results/svr/results_mixed_kernel1def.csv
     mk_svr_mee = model_assessment(mk_svr_gs, X_train, y_train, X_inner_test, y_inner_test)
-    
+    """
     # RANDOM FOREST
     # results_df = load_gridsearch_results("results/linear/linear_lbe_regularized_gs_results.csv")
     # plot_search_df_results(results_df, "ENSAMBLE SVR parameters")
@@ -107,7 +105,7 @@ if __name__ == '__main__':
     plot_search_results(random_forest_gs, "ENSAMBLE SVR parameters")
     lbe_reg_mee = model_assessment(random_forest_gs.best_estimator_, X_train, y_train, X_inner_test, y_inner_test)
     save_gridsearch_results(lbe_reg_mee, "results/ranndom_forest/random_forest_results.csv")
-    """
+    
     # PLOTS
     # all
 
@@ -130,3 +128,4 @@ if __name__ == '__main__':
     #mlcup_model_prediction(path=path, X_test=X_test)
 
     # predict_btest('data//ml-cup21//ML-CUP21-TS.csv', linear_gs)
+    """

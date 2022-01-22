@@ -14,7 +14,7 @@ def load_gridsearch_results(filename):
     return dict_from_csv
 
 
-def save_gridsearch_results(gs, filename):
+def save_gridsearch_results(gs, filename, is_svr=False):
     # if isinstance(gs, Pipeline):
     #     with open(filename, "w", newline='') as outfile:
     #         # first lines for model info

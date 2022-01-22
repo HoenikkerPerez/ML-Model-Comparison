@@ -38,7 +38,8 @@ def my_kernel(g_p, g_r, d, rho):
     def kernel(x1, x2):
         m_kernel = (rho * polynomial_kernel(x1, x2, degree=d, gamma=g_p, coef0=0) + (
             1 - rho) * rbf_kernel(x1, x2, gamma=g_r))
-        # + (1-rho) *sigmoid_kernel(x1, x2))
+        # m_kernel = (rho * polynomial_kernel(x1, x2, degree=d, gamma=g_p, coef0=0) + (
+        #     1 - rho) * rbf_kernel(x1, x2, gamma=g_r))
         return m_kernel
 
     return kernel
@@ -51,7 +52,7 @@ def s_print(*a, **b):
 def fit_svr(X_train, y_train, g_p, g_r, d, rho, eps=.1, C=14, svr_idx=None):
     global results0, results1
     tic = time.perf_counter()
-    svr = Pipeline([('scl', StandardScaler()),
+    svr = Pipeline([
                     ('reg',
                      SVR(kernel=my_kernel(g_p, g_r, d, rho), epsilon=eps, C=C, cache_size=10000))])
 
@@ -105,16 +106,20 @@ def mixed_kernel_srv_model_selection(X_train, y_train):
     Networks. IJCNN'02 (Cat. No.02CH37290) - Improved SVM regression using mixtures of kernels. , (), 2785–2790.
     doi:10.1109/IJCNN.2002.1007589
     """
+    with open("results_mixed_kernel0def.csv", "w") as fd:
+        fd.write("g_p,g_r,d,rho,eps,C,mean_train,std_train,mean_test,std_test,time,sv_ratio\n")
+    with open("results_mixed_kernel1def.csv", "w") as fd:
+        fd.write("g_p,g_r,d,rho,eps,C,mean_train,std_train,mean_test,std_test,time,sv_ratio\n")
 
     # p = Pool(4)
     print("g_p,g_r,d,rho,eps,C,mean_train,std_train,mean_test,std_test,time,sv_ratio")
     for svr_idx in [0,1]:
         # for eps in [0, .1, 1]:
-        for C in [.1, 10, 100]:
+        for C in [.1, 1, 10, 100]:
             for g_p in [.01, .1]:
                 for g_r in [.01, .1]:
-                    for d in [1, 2, 3]:
-                        for rho in [.2, .4, .6, .8]:
+                    for d in [1,2,3,4,5]:
+                        for rho in [.1,.2,.3,.4,.5,.6,.7,.8,.9]: #[0, .1, .2, .3, .4, .5, .6, .7, .8,.9, 1]:
                             eps = .1
                             task = {"X_train": X_train,
                                     "y_train": y_train[:,svr_idx],
@@ -135,7 +140,7 @@ def mixed_kernel_srv_model_selection(X_train, y_train):
     best_model_0 = results0[0]
     best_model_1 = results1[0]
 
-    with open("results_mixed_kernel0def.csv","w") as fd:
+    with open("results_mixed_kernel0def.csv","a") as fd:
         for res in results0:
             fd.write("%.3f,%.3f,%d,%.1f,%.1f,"
                     "%.2f,%0.3f,%0.3f,%0.3f,%0.3f,%.2f,%.2f\n" % (res["g_p"], res["g_r"], res["d"], res["rho"], res["eps"], res["C"],
@@ -146,7 +151,7 @@ def mixed_kernel_srv_model_selection(X_train, y_train):
                  res["time"],
                  res["sv_ratio"]))
 
-    with open("results_mixed_kernel1def.csv","w") as fd:
+    with open("results_mixed_kernel1def.csv","a") as fd:
         for res in results1:
             fd.write("%.3f,%.3f,%d,%.1f,%.1f,"
                     "%.2f,%0.3f,%0.3f,%0.3f,%0.3f,%.2f,%.2f\n" % (res["g_p"], res["g_r"], res["d"], res["rho"], res["eps"], res["C"],
@@ -179,6 +184,7 @@ def mixed_kernel_srv_model_selection(X_train, y_train):
     svr1 = Pipeline([('scl', StandardScaler()),
                      ('reg', SVR(kernel=my_kernel(best_model_1["g_p"], best_model_1["g_r"], best_model_1["d"],
                                                   best_model_1["rho"]), epsilon=best_model_1["eps"], C=best_model_1["C"], cache_size=10000))])
+
 
     multi_model = MultioutputSVR(svr0, svr1)
 
